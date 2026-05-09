@@ -1,0 +1,18 @@
+{
+  "name": "药品管理系统",
+  "short_name": "药品管理",
+  "description": "个人药品信息管理系统 - 支持药品名称、功效、生产日期、过期时间的管理",
+  "start_url": "index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F2F2F7",
+  "theme_color": "#007AFF",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
