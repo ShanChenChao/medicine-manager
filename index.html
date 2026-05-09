@@ -28,6 +28,9 @@ input,textarea,select,button{font-family:inherit;font-size:inherit;color:inherit
 .header-title{font-size:30px;font-weight:700;letter-spacing:-0.5px;line-height:1.2}
 .header-btn{width:40px;height:40px;border-radius:50%;border:none;background:var(--primary);color:white;font-size:24px;font-weight:300;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 12px rgba(0,122,255,0.3)}
 .header-btn:active{transform:scale(0.88);background:var(--primaryPress)}
+.header-menu-btn{width:36px;height:36px;border-radius:50%;border:none;background:transparent;color:var(--secondaryText);font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;margin-right:4px}
+.header-menu-btn:active{background:var(--card);transform:scale(0.92)}
+.header-left{display:flex;align-items:center;gap:2px}
 
 /* Stats */
 .stats-bar{display:flex;gap:8px;padding:8px 20px 6px}
@@ -133,14 +136,44 @@ input,textarea,select,button{font-family:inherit;font-size:inherit;color:inherit
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}
 @keyframes fadeIn2{from{opacity:0}to{opacity:1}}
+
+/* Action Sheet */
+.action-overlay{position:fixed;inset:0;z-index:250;background:var(--modalBg);display:none;justify-content:center;align-items:flex-end;padding:20px;padding-bottom:calc(20px + var(--safeBottom))}
+.action-overlay.active{display:flex}
+.action-sheet{background:var(--card);border-radius:14px;width:100%;max-width:400px;overflow:hidden;animation:slideUp 0.3s cubic-bezier(0.32,0.72,0,1)}
+.action-item{display:flex;align-items:center;gap:12px;width:100%;padding:16px 20px;border:none;background:none;font-size:16px;text-align:left;color:var(--text);cursor:pointer;transition:background 0.1s;border-bottom:1px solid var(--separator)}
+.action-item:last-child{border-bottom:none}
+.action-item:active{background:var(--bg)}
+.action-item .action-icon{font-size:22px;width:28px;text-align:center}
+.action-item .action-text{flex:1}
+.action-item .action-desc{font-size:12px;color:var(--secondaryText);margin-top:1px}
+.action-cancel{margin-top:8px;background:var(--card);border-radius:14px;width:100%;max-width:400px;padding:14px;border:none;font-size:16px;font-weight:600;color:var(--secondaryText);cursor:pointer;text-align:center;transition:background 0.1s}
+.action-cancel:active{background:var(--bg)}
+
+/* Import confirm */
+.import-overlay{position:fixed;inset:0;z-index:260;background:var(--modalBg);display:none;justify-content:center;align-items:center;padding:20px}
+.import-overlay.active{display:flex}
+.import-box{background:var(--card);border-radius:14px;width:100%;max-width:300px;padding:20px;animation:fadeIn 0.2s ease}
+.import-box h3{font-size:17px;font-weight:600;margin-bottom:6px}
+.import-box p{font-size:13px;color:var(--secondaryText);line-height:1.4;margin-bottom:14px}
+.import-box .import-actions{display:flex;gap:8px}
+.import-box .import-actions button{flex:1;padding:11px;border-radius:8px;border:none;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.15s}
+.import-box .import-actions button:active{transform:scale(0.97)}
+.import-box .btn-import-confirm{background:var(--primary);color:white}
+.import-box .btn-import-cancel{background:var(--bg);color:var(--secondaryText)}
 </style>
 </head>
 <body>
 
 <div id="app">
   <header class="header">
-    <div class="header-title">药品管理</div>
-    <button class="header-btn" id="addBtn" aria-label="添加药品">+</button>
+    <div class="header-left">
+      <div class="header-title">药品管理</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <button class="header-menu-btn" id="menuBtn" aria-label="菜单">⋯</button>
+      <button class="header-btn" id="addBtn" aria-label="添加药品">+</button>
+    </div>
   </header>
 
   <div class="stats-bar" id="statsBar">
@@ -240,6 +273,38 @@ input,textarea,select,button{font-family:inherit;font-size:inherit;color:inherit
     <div class="confirm-actions">
       <button class="confirm-cancel" id="confirmCancel">取消</button>
       <button class="confirm-delete" id="confirmDelete">删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- Action Sheet -->
+<div class="action-overlay" id="actionOverlay">
+  <div style="width:100%;max-width:400px;display:flex;flex-direction:column;align-items:center">
+    <div class="action-sheet">
+      <button class="action-item" id="exportBtn">
+        <span class="action-icon">📤</span>
+        <div><div class="action-text">导出数据</div><div class="action-desc">保存为 JSON 文件，可分享给家人</div></div>
+      </button>
+      <button class="action-item" id="importBtn">
+        <span class="action-icon">📥</span>
+        <div><div class="action-text">导入数据</div><div class="action-desc">从 JSON 文件导入药品数据</div></div>
+      </button>
+    </div>
+    <button class="action-cancel" id="actionCancel">取消</button>
+  </div>
+</div>
+
+<!-- Hidden file input -->
+<input type="file" id="fileInput" accept=".json,application/json" style="display:none">
+
+<!-- Import Confirm -->
+<div class="import-overlay" id="importOverlay">
+  <div class="import-box">
+    <h3 id="importTitle">导入确认</h3>
+    <p id="importMsg">正在解析文件...</p>
+    <div class="import-actions">
+      <button class="btn-import-cancel" id="importCancel">取消</button>
+      <button class="btn-import-confirm" id="importConfirm">导入</button>
     </div>
   </div>
 </div>
@@ -536,6 +601,77 @@ function showToast(msg){
   toastTimer = setTimeout(()=>el.classList.remove('show'),2000);
 }
 
+/* ---- Export / Import ---- */
+function exportData(){
+  dbGetAll().then(medicines=>{
+    if(medicines.length===0){ showToast('没有数据可导出'); return; }
+    const blob = new Blob([JSON.stringify(medicines,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `药品数据_${new Date().toLocaleDateString('zh-CN').replace(/\//g,'-')}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    closeActionSheet();
+    showToast(`已导出 ${medicines.length} 条药品数据`);
+  });
+}
+
+let importDataCache = null;
+function handleImportFile(file){
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if(!Array.isArray(data)) throw new Error('文件格式错误，应为药品数据数组');
+      if(data.length===0){ showToast('文件中没有数据'); closeActionSheet(); return; }
+      importDataCache = data;
+      const all = await dbGetAll();
+      const existingIds = new Set(all.map(m=>m.id));
+      const newItems = data.filter(m=>!existingIds.has(m.id));
+      const dupeCount = data.length - newItems.length;
+      document.getElementById('importTitle').textContent = `发现 ${data.length} 条药品`;
+      document.getElementById('importMsg').textContent =
+        `新增 ${newItems.length} 条${dupeCount>0?`，${dupeCount} 条已存在将跳过`:''}。确定导入吗？`;
+      document.getElementById('importOverlay').classList.add('active');
+    } catch(err){
+      showToast('文件解析失败：'+err.message);
+      closeActionSheet();
+    }
+  };
+  reader.readAsText(file);
+}
+
+async function doImport(){
+  if(!importDataCache) return;
+  const all = await dbGetAll();
+  const existingIds = new Set(all.map(m=>m.id));
+  let count = 0;
+  for(const item of importDataCache){
+    if(!existingIds.has(item.id)){
+      if(!item.id) item.id = uuid();
+      if(!item.createdAt) item.createdAt = new Date().toISOString();
+      item.updatedAt = new Date().toISOString();
+      try { await dbAdd(item); count++; } catch(e){ console.warn('导入失败:',e); }
+    }
+  }
+  document.getElementById('importOverlay').classList.remove('active');
+  importDataCache = null;
+  closeActionSheet();
+  showToast(`成功导入 ${count} 条数据`);
+  loadData();
+}
+
+/* ---- Action Sheet ---- */
+function openActionSheet(){
+  document.getElementById('actionOverlay').classList.add('active');
+}
+function closeActionSheet(){
+  document.getElementById('actionOverlay').classList.remove('active');
+}
+
 /* ---- App API ---- */
 window.App = {
   async view(id){
@@ -635,6 +771,30 @@ let searchTimer = null;
 document.getElementById('searchInput').addEventListener('input', ()=>{
   clearTimeout(searchTimer);
   searchTimer = setTimeout(()=>loadData(),200);
+});
+
+/* Action Sheet */
+document.getElementById('menuBtn').addEventListener('click', openActionSheet);
+document.getElementById('actionCancel').addEventListener('click', closeActionSheet);
+document.getElementById('actionOverlay').addEventListener('click', e => {
+  if(e.target === e.currentTarget) closeActionSheet();
+});
+document.getElementById('exportBtn').addEventListener('click', exportData);
+document.getElementById('importBtn').addEventListener('click', ()=>{
+  closeActionSheet();
+  document.getElementById('fileInput').value = '';
+  document.getElementById('fileInput').click();
+});
+document.getElementById('fileInput').addEventListener('change', e => {
+  if(e.target.files && e.target.files[0]) handleImportFile(e.target.files[0]);
+});
+document.getElementById('importCancel').addEventListener('click', ()=>{
+  document.getElementById('importOverlay').classList.remove('active');
+  importDataCache = null;
+});
+document.getElementById('importConfirm').addEventListener('click', doImport);
+document.getElementById('importOverlay').addEventListener('click', e => {
+  if(e.target === e.currentTarget){ document.getElementById('importOverlay').classList.remove('active'); importDataCache = null; }
 });
 
 async function loadData(){
